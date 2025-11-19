@@ -1,6 +1,6 @@
 const DialogUtils = {
   overlay: null,
-
+  
   init() {
     if (!this.overlay) {
       this.overlay = document.getElementById('dialogOverlay');

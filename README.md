@@ -29,7 +29,8 @@ SITTA (Sistem Inventori & Tracking Transaksi Ajar) adalah aplikasi berbasis web 
 
 - Vue.js 2.6.14 (CDN)
 - Lucide Icons
-- Vanilla CSS
+- Custom CSS (Responsive Design)
+- Custom Dialog/Modal System
 
 ## Struktur Proyek
 
@@ -39,8 +40,10 @@ sitta-praktik-2/
 ├── stok.html            # Halaman stok bahan ajar
 ├── tracking.html        # Halaman tracking delivery order
 ├── css/
-│   └── style.css        # Stylesheet utama
+│   └── style.css        # Stylesheet utama (responsive)
 └── js/
+    ├── dataBahanAjar.js # Data bahan ajar
+    ├── dialogUtils.js   # Custom dialog/modal system
     ├── stok-app.js      # Logic Vue.js untuk stok
     └── tracking-app.js  # Logic Vue.js untuk tracking
 ```

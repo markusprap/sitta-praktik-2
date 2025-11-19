@@ -1,9 +1,7 @@
-
 var app = new Vue({
   el: '#app',
   data: {
     sidebarOpen: false,
-    
     pengirimanList: dataBahanAjar.pengirimanList,
     paket: dataBahanAjar.paket,
     upbjjList: dataBahanAjar.upbjjList,
