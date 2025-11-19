@@ -39,6 +39,18 @@ var app = new Vue({
   },
   
   watch: {
+    sidebarOpen: function(newVal) {
+      if (newVal) {
+        document.body.classList.add('sidebar-open');
+        setTimeout(() => {
+          document.body.addEventListener('click', this.handleBackdropClick);
+        }, 100);
+      } else {
+        document.body.classList.remove('sidebar-open');
+        document.body.removeEventListener('click', this.handleBackdropClick);
+      }
+    },
+    
     'formDO.paketKode': function(newPaket, oldPaket) {
       if (newPaket) {
         const paketData = this.paket.find(p => p.kode === newPaket);
@@ -70,6 +82,12 @@ var app = new Vue({
       this.sidebarOpen = !this.sidebarOpen;
     },
     
+    handleBackdropClick(e) {
+      if (this.sidebarOpen && !e.target.closest('.sidebar') && !e.target.closest('.hamburger')) {
+        this.sidebarOpen = false;
+      }
+    },
+    
     generateDONumber() {
       const year = new Date().getFullYear();
       const sequence = String(this.doCounter).padStart(3, '0');
@@ -86,7 +104,7 @@ var app = new Vue({
       this.errors = {};
       
       if (!this.validateDOForm()) {
-        alert(' Mohon lengkapi semua field dengan benar!');
+        DialogUtils.showError('Mohon lengkapi semua field dengan benar!');
         return;
       }
       
@@ -114,7 +132,7 @@ var app = new Vue({
       
       this.$set(this.tracking, nomorDO, newDO);
       
-      alert(` Delivery Order berhasil dibuat!\nNomor DO: ${nomorDO}`);
+      DialogUtils.showSuccess(`Delivery Order berhasil dibuat!<br><strong>Nomor DO: ${nomorDO}</strong>`);
       
       this.trackingNumber = nomorDO;
       this.searchTracking();
@@ -155,7 +173,7 @@ var app = new Vue({
       this.trackingResult = null;
       
       if (!this.trackingNumber) {
-        alert(' Masukkan nomor DO terlebih dahulu!');
+        DialogUtils.showWarning('Masukkan nomor DO terlebih dahulu!');
         return;
       }
       

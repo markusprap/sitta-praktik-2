@@ -115,7 +115,7 @@
                         </div>
                         <div class="stat-content">
                             <span class="stat-label">Perlu Restock</span>
-                            <span class="stat-value">{{ stokMempis }}</span>
+                            <span class="stat-value">{{ stokMenipis }}</span>
                             <span class="stat-change negative">
                                 <i data-lucide="trending-down"></i>
                                 Segera tambah stok
@@ -166,28 +166,6 @@
                                 <i data-lucide="arrow-right"></i>
                             </div>
                         </a>
-
-                        <div class="action-card action-card-disabled">
-                            <div class="action-icon">
-                                <i data-lucide="bar-chart"></i>
-                            </div>
-                            <h4>Laporan Analitik</h4>
-                            <p>Coming soon...</p>
-                            <div class="action-arrow">
-                                <i data-lucide="lock"></i>
-                            </div>
-                        </div>
-
-                        <div class="action-card action-card-disabled">
-                            <div class="action-icon">
-                                <i data-lucide="users"></i>
-                            </div>
-                            <h4>Manajemen User</h4>
-                            <p>Coming soon...</p>
-                            <div class="action-arrow">
-                                <i data-lucide="lock"></i>
-                            </div>
-                        </div>
                     </div>
                 </div>
 
@@ -200,29 +178,61 @@
         </div>
     </div>
 
+    <div id="dialogOverlay" class="dialog-overlay"></div>
+
     
     <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
     
     <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="js/dialogUtils.js"></script>
+    <script src="js/dataBahanAjar.js"></script>
     <script>
-        // Simple Vue app for dashboard
         var app = new Vue({
             el: '#app',
             data: {
                 sidebarOpen: false,
-                totalStok: 156,
-                stokAman: 89,
-                stokMempis: 45,
-                totalDO: 23
+                stok: dataBahanAjar.stok,
+                tracking: dataBahanAjar.tracking
+            },
+            computed: {
+                totalStok() {
+                    return this.stok.reduce((total, item) => total + item.qty, 0);
+                },
+                stokAman() {
+                    return this.stok.filter(item => item.qty >= item.safety).reduce((total, item) => total + item.qty, 0);
+                },
+                stokMenipis() {
+                    return this.stok.filter(item => item.qty < item.safety).reduce((total, item) => total + item.qty, 0);
+                },
+                totalDO() {
+                    return Object.keys(this.tracking).length;
+                }
             },
             methods: {
                 toggleSidebar() {
                     this.sidebarOpen = !this.sidebarOpen;
+                },
+                handleBackdropClick(e) {
+                    if (this.sidebarOpen && !e.target.closest('.sidebar') && !e.target.closest('.hamburger')) {
+                        this.sidebarOpen = false;
+                    }
+                }
+            },
+            watch: {
+                sidebarOpen(newVal) {
+                    if (newVal) {
+                        document.body.classList.add('sidebar-open');
+                        setTimeout(() => {
+                            document.body.addEventListener('click', this.handleBackdropClick);
+                        }, 100);
+                    } else {
+                        document.body.classList.remove('sidebar-open');
+                        document.body.removeEventListener('click', this.handleBackdropClick);
+                    }
                 }
             }
         });
         
-        // Initialize Lucide icons
         app.$nextTick(() => {
             lucide.createIcons();
         });

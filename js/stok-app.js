@@ -64,6 +64,18 @@ var app = new Vue({
   },
   
   watch: {
+    sidebarOpen: function(newVal) {
+      if (newVal) {
+        document.body.classList.add('sidebar-open');
+        setTimeout(() => {
+          document.body.addEventListener('click', this.handleBackdropClick);
+        }, 100);
+      } else {
+        document.body.classList.remove('sidebar-open');
+        document.body.removeEventListener('click', this.handleBackdropClick);
+      }
+    },
+    
     'formData.qty': function(newQty, oldQty) {
       if (newQty < this.formData.safety && newQty > 0) {
         this.errors.qty = 'Qty dibawah safety stock';
@@ -87,6 +99,16 @@ var app = new Vue({
   },
   
   methods: {
+    toggleSidebar() {
+      this.sidebarOpen = !this.sidebarOpen;
+    },
+    
+    handleBackdropClick(e) {
+      if (this.sidebarOpen && !e.target.closest('.sidebar') && !e.target.closest('.hamburger')) {
+        this.sidebarOpen = false;
+      }
+    },
+    
     formatHarga(harga) {
       return harga.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
     },
@@ -131,7 +153,7 @@ var app = new Vue({
       this.errors = {};
       
       if (!this.validateForm()) {
-        alert(' Mohon periksa kembali input Anda!');
+        DialogUtils.showError('Mohon periksa kembali input Anda!');
         return;
       }
       
@@ -139,7 +161,7 @@ var app = new Vue({
         const index = this.stok.findIndex(item => item.kode === this.formData.kode);
         if (index !== -1) {
           this.$set(this.stok, index, { ...this.formData });
-          alert(' Bahan ajar berhasil diupdate!');
+          DialogUtils.showSuccess('Bahan ajar berhasil diupdate!');
         }
       } else {
         const exists = this.stok.find(item => item.kode === this.formData.kode);
@@ -149,7 +171,7 @@ var app = new Vue({
         }
         
         this.stok.push({ ...this.formData });
-        alert(' Bahan ajar baru berhasil ditambahkan!');
+        DialogUtils.showSuccess('Bahan ajar baru berhasil ditambahkan!');
       }
       
       this.cancelForm();
@@ -187,13 +209,16 @@ var app = new Vue({
     },
     
     deleteBahanAjar(kode) {
-      if (confirm(`Apakah Anda yakin ingin menghapus bahan ajar ${kode}?`)) {
-        const index = this.stok.findIndex(item => item.kode === kode);
-        if (index !== -1) {
-          this.stok.splice(index, 1);
-          alert(' Bahan ajar berhasil dihapus!');
+      DialogUtils.showConfirm(
+        `Apakah Anda yakin ingin menghapus bahan ajar ${kode}?`,
+        () => {
+          const index = this.stok.findIndex(item => item.kode === kode);
+          if (index !== -1) {
+            this.stok.splice(index, 1);
+            DialogUtils.showSuccess('Bahan ajar berhasil dihapus!');
+          }
         }
-      }
+      );
     },
     
     cancelForm() {
