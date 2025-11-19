@@ -1,9 +1,5 @@
 # SITTA - Sistem Inventori & Tracking Transaksi Ajar
 
-Aplikasi web untuk pemesanan dan distribusi bahan ajar di Universitas Terbuka.
-
-## Deskripsi Proyek
-
 SITTA (Sistem Inventori & Tracking Transaksi Ajar) adalah aplikasi berbasis web yang dibangun menggunakan Vue.js untuk mengelola inventori bahan ajar dan tracking delivery order di lingkungan Universitas Terbuka.
 
 ## Fitur Utama
@@ -11,7 +7,7 @@ SITTA (Sistem Inventori & Tracking Transaksi Ajar) adalah aplikasi berbasis web 
 ### 1. Dashboard
 - Ringkasan statistik stok bahan ajar
 - Informasi delivery order
-- Status stok (aman, mempis, kosong)
+- Status stok (aman, menipis, kosong)
 - Akses cepat ke fitur utama
 
 ### 2. Stok Bahan Ajar
@@ -20,7 +16,7 @@ SITTA (Sistem Inventori & Tracking Transaksi Ajar) adalah aplikasi berbasis web 
 - Pencarian bahan ajar
 - Sorting berdasarkan judul, stok, dan harga
 - CRUD (Create, Read, Update, Delete) bahan ajar
-- Status stok otomatis (Aman/Mempis/Kosong)
+- Status stok otomatis (Aman/Menipis/Kosong)
 - Validasi input form
 
 ### 3. Tracking Delivery Order
@@ -48,16 +44,6 @@ sitta-praktik-2/
     ├── stok-app.js      # Logic Vue.js untuk stok
     └── tracking-app.js  # Logic Vue.js untuk tracking
 ```
-
-## Cara Menjalankan
-
-1. Clone repository ini
-2. Buka terminal dan navigasi ke folder proyek
-3. Jalankan local server:
-   ```bash
-   python3 -m http.server 8000
-   ```
-4. Buka browser dan akses `http://localhost:8000`
 
 ## Implementasi Vue.js
 
