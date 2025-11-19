@@ -88,21 +88,7 @@ sitta-praktik-2/
    - Monitor perubahan filter dan search
    - Update UI secara real-time
 
-## Fitur Tambahan
-
-- Responsive design untuk desktop
-- Modern UI dengan UT brand colors
-- Form validation
-- Status badge dengan color coding
-- Sidebar navigation
-- Clean dan maintainable code structure
-
 ## Penulis
 
-Markus Prap Kurniawan
-NIM: 048397016
-Universitas Terbuka
-
-## Lisensi
-
-Proyek ini dibuat untuk keperluan tugas 2 Pemrograman Berbasis Web - Universitas Terbuka.
+- Markus Prap Kurniawan
+- NIM: 048397016
