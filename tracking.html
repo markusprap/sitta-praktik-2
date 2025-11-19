@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tracking Delivery Order - SITTA</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div id="app">
+        
+        <aside class="sidebar" :class="{ 'sidebar-open': sidebarOpen }">
+            <div class="sidebar-header">
+                <div class="sidebar-logo">
+                    <i data-lucide="layers" class="logo-icon"></i>
+                    <span class="logo-text">SITTA</span>
+                </div>
+                <button class="sidebar-close" @click="toggleSidebar">
+                    <i data-lucide="x"></i>
+                </button>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <a href="index.html" class="nav-item">
+                    <i data-lucide="home"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="stok.html" class="nav-item">
+                    <i data-lucide="package"></i>
+                    <span>Stok Bahan Ajar</span>
+                </a>
+                <a href="tracking.html" class="nav-item active">
+                    <i data-lucide="truck"></i>
+                    <span>Tracking DO</span>
+                </a>
+            </nav>
+            
+            <div class="sidebar-footer">
+                <div class="user-info">
+                    <i data-lucide="user-circle"></i>
+                    <div class="user-details">
+                        <span class="user-name">Admin SITTA</span>
+                        <span class="user-role">Pengelola Sistem</span>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        
+        <div class="main-content">
+            
+            <header class="topbar">
+                <button class="hamburger" @click="toggleSidebar">
+                    <i data-lucide="menu"></i>
+                </button>
+                <div class="topbar-title">
+                    <i data-lucide="truck" class="topbar-icon"></i>
+                    <h1>Tracking Delivery Order</h1>
+                </div>
+                <div class="topbar-actions">
+                    <button class="topbar-btn" title="Notifikasi">
+                        <i data-lucide="bell"></i>
+                    </button>
+                    <button class="topbar-btn" title="Pengaturan">
+                        <i data-lucide="settings"></i>
+                    </button>
+                </div>
+            </header>
+
+        <div class="container">
+            
+            <div class="form-section">
+                <div class="section-header">
+                    <i data-lucide="file-text"></i>
+                    <h3>Buat Delivery Order Baru</h3>
+                </div>
+                
+                <form @submit.prevent="createDeliveryOrder">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>NIM: <span class="required">*</span></label>
+                            <input 
+                                type="text" 
+                                v-model="formDO.nim" 
+                                placeholder="contoh: 530055123"
+                                maxlength="9"
+                                required
+                            >
+                            <span v-if="errors.nim" class="error-text">{{ errors.nim }}</span>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Nama Mahasiswa: <span class="required">*</span></label>
+                            <input 
+                                type="text" 
+                                v-model="formDO.nama" 
+                                placeholder="contoh: Budi Santoso"
+                                required
+                            >
+                            <span v-if="errors.nama" class="error-text">{{ errors.nama }}</span>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Jenis Pengiriman: <span class="required">*</span></label>
+                            <select v-model="formDO.ekspedisi" required>
+                                <option value="">-- Pilih Ekspedisi --</option>
+                                <option v-for="pengiriman in pengirimanList" 
+                                        :key="pengiriman.kode" 
+                                        :value="pengiriman.kode">
+                                    {{ pengiriman.nama }}
+                                </option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Paket Bahan Ajar: <span class="required">*</span></label>
+                            <select v-model="formDO.paketKode" @change="onPaketChange" required>
+                                <option value="">-- Pilih Paket --</option>
+                                <option v-for="p in paket" :key="p.kode" :value="p.kode">
+                                    {{ p.nama }} - Rp {{ formatHarga(p.harga) }}
+                                </option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Tanggal Kirim: <span class="required">*</span></label>
+                            <input 
+                                type="date" 
+                                v-model="formDO.tanggalKirim" 
+                                :min="todayDate"
+                                required
+                            >
+                        </div>
+
+                        <div class="form-group" v-if="selectedPaket">
+                            <label>Total Harga:</label>
+                            <div class="price-display">
+                                Rp {{ formatHarga(selectedPaket.harga) }}
+                            </div>
+                        </div>
+                    </div>
+
+                    
+                    <div v-show="selectedPaket" class="paket-detail">
+                        <div class="paket-detail-header">
+                            <i data-lucide="package"></i>
+                            <h4>Detail Paket:</h4>
+                        </div>
+                        <p><strong>Nama Paket:</strong> {{ selectedPaket ? selectedPaket.nama : '-' }}</p>
+                        <p><strong>Isi Paket:</strong> 
+                            <span v-if="selectedPaket">
+                                <span v-for="(kode, index) in selectedPaket.isi" :key="kode">
+                                    {{ kode }}<span v-if="index < selectedPaket.isi.length - 1">, </span>
+                                </span>
+                            </span>
+                        </p>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">
+                            <i data-lucide="send"></i>
+                            Buat Delivery Order
+                        </button>
+                        <button type="button" @click="resetForm" class="btn btn-secondary">
+                            <i data-lucide="refresh-cw"></i>
+                            Reset Form
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            
+            <div class="tracking-section">
+                <div class="section-header">
+                    <i data-lucide="search"></i>
+                    <h3>Lacak Delivery Order</h3>
+                </div>
+                
+                <div class="tracking-search">
+                    <input 
+                        type="text" 
+                        v-model="trackingNumber" 
+                        placeholder="Masukkan nomor DO (contoh: DO2025-001)"
+                        @keyup.enter="searchTracking"
+                    >
+                    <button @click="searchTracking" class="btn btn-primary">
+                        <i data-lucide="search"></i>
+                        Lacak
+                    </button>
+                </div>
+
+                
+                <div v-if="trackingResult" class="tracking-result">
+                    <div class="tracking-header">
+                        <h4>Nomor DO: {{ trackingResult.nomorDO }}</h4>
+                        <span :class="['status-badge', getTrackingStatusClass(trackingResult.status)]">
+                            {{ trackingResult.status }}
+                        </span>
+                    </div>
+
+                    <div class="tracking-info">
+                        <div class="info-row">
+                            <span class="label">NIM:</span>
+                            <span class="value">{{ trackingResult.nim }}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="label">Nama:</span>
+                            <span class="value">{{ trackingResult.nama }}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="label">Ekspedisi:</span>
+                            <span class="value">{{ trackingResult.ekspedisi }}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="label">Paket:</span>
+                            <span class="value">{{ trackingResult.paket }}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="label">Tanggal Kirim:</span>
+                            <span class="value">{{ formatDate(trackingResult.tanggalKirim) }}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="label">Total:</span>
+                            <span class="value">Rp {{ formatHarga(trackingResult.total) }}</span>
+                        </div>
+                    </div>
+
+                    
+                    <div v-if="trackingResult.perjalanan && trackingResult.perjalanan.length > 0" class="tracking-timeline">
+                        <div class="timeline-header">
+                            <i data-lucide="map-pin"></i>
+                            <h4>Riwayat Perjalanan:</h4>
+                        </div>
+                        <div class="timeline">
+                            <div v-for="(step, index) in trackingResult.perjalanan" 
+                                 :key="index" 
+                                 class="timeline-item">
+                                <div class="timeline-dot"></div>
+                                <div class="timeline-content">
+                                    <div class="timeline-time">{{ step.waktu }}</div>
+                                    <div class="timeline-desc">{{ step.keterangan }}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div v-else-if="trackingNotFound" class="tracking-not-found">
+                    <i data-lucide="alert-circle"></i>
+                    <p>Nomor DO tidak ditemukan. Periksa kembali nomor yang Anda masukkan.</p>
+                </div>
+            </div>
+
+            
+            <div class="do-list-section">
+                <div class="section-header">
+                    <i data-lucide="list"></i>
+                    <h3>Daftar Delivery Order</h3>
+                </div>
+                
+                <div v-if="Object.keys(tracking).length > 0" class="do-grid">
+                    <div v-for="(data, noDO) in tracking" 
+                         :key="noDO" 
+                         class="do-card"
+                         @click="viewTracking(noDO)">
+                        <div class="do-card-header">
+                            <strong>{{ noDO }}</strong>
+                            <span :class="['status-badge-small', getTrackingStatusClass(data.status)]">
+                                {{ data.status }}
+                            </span>
+                        </div>
+                        <div class="do-card-body">
+                            <p><strong>{{ data.nama }}</strong></p>
+                            <p><i data-lucide="user" class="inline-icon"></i> NIM: {{ data.nim }}</p>
+                            <p><i data-lucide="package" class="inline-icon"></i> {{ data.paket }}</p>
+                            <p><i data-lucide="calendar" class="inline-icon"></i> {{ formatDate(data.tanggalKirim) }}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div v-else class="empty-state">
+                    <i data-lucide="inbox" class="empty-icon"></i>
+                    <p>Belum ada delivery order.</p>
+                </div>
+            </div>
+        </div>
+        </div> 
+    </div>
+
+    
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
+    
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <script src="js/dataBahanAjar.js"></script>
+    <script src="js/tracking-app.js"></script>
+    <script>
+        app.$nextTick(() => {
+            lucide.createIcons();
+        });
+        app.$watch(() => app.tracking, () => {
+            app.$nextTick(() => lucide.createIcons());
+        }, { deep: true });
+    </script>
+</body>
+</html>

@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SITTA - Sistem Inventori & Tracking Transaksi Ajar</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div id="app">
+        
+        <aside class="sidebar" :class="{ 'sidebar-open': sidebarOpen }">
+            <div class="sidebar-header">
+                <div class="sidebar-logo">
+                    <i data-lucide="layers" class="logo-icon"></i>
+                    <span class="logo-text">SITTA</span>
+                </div>
+                <button class="sidebar-close" @click="toggleSidebar">
+                    <i data-lucide="x"></i>
+                </button>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <a href="index.html" class="nav-item active">
+                    <i data-lucide="home"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="stok.html" class="nav-item">
+                    <i data-lucide="package"></i>
+                    <span>Stok Bahan Ajar</span>
+                </a>
+                <a href="tracking.html" class="nav-item">
+                    <i data-lucide="truck"></i>
+                    <span>Tracking DO</span>
+                </a>
+            </nav>
+            
+            <div class="sidebar-footer">
+                <div class="user-info">
+                    <i data-lucide="user-circle"></i>
+                    <div class="user-details">
+                        <span class="user-name">Admin SITTA</span>
+                        <span class="user-role">Pengelola Sistem</span>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        
+        <div class="main-content">
+            
+            <header class="topbar">
+                <button class="hamburger" @click="toggleSidebar">
+                    <i data-lucide="menu"></i>
+                </button>
+                <div class="topbar-title">
+                    <i data-lucide="home" class="topbar-icon"></i>
+                    <h1>Dashboard</h1>
+                </div>
+                <div class="topbar-actions">
+                    <button class="topbar-btn" title="Notifikasi">
+                        <i data-lucide="bell"></i>
+                    </button>
+                    <button class="topbar-btn" title="Pengaturan">
+                        <i data-lucide="settings"></i>
+                    </button>
+                </div>
+            </header>
+
+            <div class="container dashboard-container">
+                
+                <div class="dashboard-welcome">
+                    <div class="welcome-content">
+                        <h2>Selamat Datang di SITTA - UT</h2>
+                        <p>Sistem Inventori & Tracking Transaksi Ajar Universitas Terbuka</p>
+                    </div>
+                    <div class="welcome-icon">
+                        <i data-lucide="graduation-cap"></i>
+                    </div>
+                </div>
+
+                
+                <div class="stats-grid">
+                    <div class="stat-card stat-card-primary">
+                        <div class="stat-icon">
+                            <i data-lucide="package"></i>
+                        </div>
+                        <div class="stat-content">
+                            <span class="stat-label">Total Stok Bahan Ajar</span>
+                            <span class="stat-value">{{ totalStok }}</span>
+                            <span class="stat-change positive">
+                                <i data-lucide="trending-up"></i>
+                                +12% dari bulan lalu
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="stat-card stat-card-success">
+                        <div class="stat-icon">
+                            <i data-lucide="check-circle"></i>
+                        </div>
+                        <div class="stat-content">
+                            <span class="stat-label">Status Aman</span>
+                            <span class="stat-value">{{ stokAman }}</span>
+                            <span class="stat-change positive">
+                                <i data-lucide="trending-up"></i>
+                                Stok mencukupi
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="stat-card stat-card-warning">
+                        <div class="stat-icon">
+                            <i data-lucide="alert-triangle"></i>
+                        </div>
+                        <div class="stat-content">
+                            <span class="stat-label">Perlu Restock</span>
+                            <span class="stat-value">{{ stokMempis }}</span>
+                            <span class="stat-change negative">
+                                <i data-lucide="trending-down"></i>
+                                Segera tambah stok
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="stat-card stat-card-danger">
+                        <div class="stat-icon">
+                            <i data-lucide="truck"></i>
+                        </div>
+                        <div class="stat-content">
+                            <span class="stat-label">Delivery Order</span>
+                            <span class="stat-value">{{ totalDO }}</span>
+                            <span class="stat-change neutral">
+                                <i data-lucide="package"></i>
+                                Sedang dikirim
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                
+                <div class="quick-actions">
+                    <h3 class="section-title">
+                        <i data-lucide="zap"></i>
+                        Aksi Cepat
+                    </h3>
+                    <div class="action-grid">
+                        <a href="stok.html" class="action-card">
+                            <div class="action-icon">
+                                <i data-lucide="package"></i>
+                            </div>
+                            <h4>Kelola Stok</h4>
+                            <p>Lihat dan kelola inventori bahan ajar</p>
+                            <div class="action-arrow">
+                                <i data-lucide="arrow-right"></i>
+                            </div>
+                        </a>
+
+                        <a href="tracking.html" class="action-card">
+                            <div class="action-icon">
+                                <i data-lucide="truck"></i>
+                            </div>
+                            <h4>Tracking DO</h4>
+                            <p>Lacak pengiriman delivery order</p>
+                            <div class="action-arrow">
+                                <i data-lucide="arrow-right"></i>
+                            </div>
+                        </a>
+
+                        <div class="action-card action-card-disabled">
+                            <div class="action-icon">
+                                <i data-lucide="bar-chart"></i>
+                            </div>
+                            <h4>Laporan Analitik</h4>
+                            <p>Coming soon...</p>
+                            <div class="action-arrow">
+                                <i data-lucide="lock"></i>
+                            </div>
+                        </div>
+
+                        <div class="action-card action-card-disabled">
+                            <div class="action-icon">
+                                <i data-lucide="users"></i>
+                            </div>
+                            <h4>Manajemen User</h4>
+                            <p>Coming soon...</p>
+                            <div class="action-arrow">
+                                <i data-lucide="lock"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                
+                <footer class="footer">
+                    <p><strong>Tugas Praktik 2 - Pemrograman Berbasis Web</strong></p>
+                    <p>Universitas Terbuka © 2025</p>
+                </footer>
+            </div>
+        </div>
+    </div>
+
+    
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
+    
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        // Simple Vue app for dashboard
+        var app = new Vue({
+            el: '#app',
+            data: {
+                sidebarOpen: false,
+                totalStok: 156,
+                stokAman: 89,
+                stokMempis: 45,
+                totalDO: 23
+            },
+            methods: {
+                toggleSidebar() {
+                    this.sidebarOpen = !this.sidebarOpen;
+                }
+            }
+        });
+        
+        // Initialize Lucide icons
+        app.$nextTick(() => {
+            lucide.createIcons();
+        });
+    </script>
+</body>
+</html>

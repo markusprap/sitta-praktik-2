@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stok Bahan Ajar - SITTA</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div id="app">
+        
+        <aside class="sidebar" :class="{ 'sidebar-open': sidebarOpen }">
+            <div class="sidebar-header">
+                <div class="sidebar-logo">
+                    <i data-lucide="layers" class="logo-icon"></i>
+                    <span class="logo-text">SITTA</span>
+                </div>
+                <button class="sidebar-close" @click="toggleSidebar">
+                    <i data-lucide="x"></i>
+                </button>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <a href="index.html" class="nav-item">
+                    <i data-lucide="home"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="stok.html" class="nav-item active">
+                    <i data-lucide="package"></i>
+                    <span>Stok Bahan Ajar</span>
+                </a>
+                <a href="tracking.html" class="nav-item">
+                    <i data-lucide="truck"></i>
+                    <span>Tracking DO</span>
+                </a>
+            </nav>
+            
+            <div class="sidebar-footer">
+                <div class="user-info">
+                    <i data-lucide="user-circle"></i>
+                    <div class="user-details">
+                        <span class="user-name">Admin SITTA</span>
+                        <span class="user-role">Pengelola Sistem</span>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        
+        <div class="main-content">
+            
+            <header class="topbar">
+                <button class="hamburger" @click="toggleSidebar">
+                    <i data-lucide="menu"></i>
+                </button>
+                <div class="topbar-title">
+                    <i data-lucide="package" class="topbar-icon"></i>
+                    <h1>Stok Bahan Ajar</h1>
+                </div>
+                <div class="topbar-actions">
+                    <button class="topbar-btn" title="Notifikasi">
+                        <i data-lucide="bell"></i>
+                    </button>
+                    <button class="topbar-btn" title="Pengaturan">
+                        <i data-lucide="settings"></i>
+                    </button>
+                </div>
+            </header>
+
+        <div class="container">
+            
+            <div class="filter-section">
+                <div class="section-header">
+                    <i data-lucide="filter"></i>
+                    <h3>Filter & Pencarian</h3>
+                </div>
+                
+                <div class="filter-grid">
+                    <div class="filter-group">
+                        <label>Filter UT-Daerah:</label>
+                        <select v-model="filterUpbjj">
+                            <option value="">Semua UT-Daerah</option>
+                            <option v-for="upbjj in upbjjList" :key="upbjj" :value="upbjj">
+                                {{ upbjj }}
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <label>Filter Kategori:</label>
+                        <select v-model="filterKategori">
+                            <option value="">Semua Kategori</option>
+                            <option v-for="kategori in kategoriList" :key="kategori" :value="kategori">
+                                {{ kategori }}
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <label>Urutkan Berdasarkan:</label>
+                        <select v-model="sortBy">
+                            <option value="">Tanpa Urutan</option>
+                            <option value="judul">Judul (A-Z)</option>
+                            <option value="qty-asc">Stok (Rendah-Tinggi)</option>
+                            <option value="qty-desc">Stok (Tinggi-Rendah)</option>
+                            <option value="harga">Harga (Rendah-Tinggi)</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <label>Cari Bahan Ajar:</label>
+                        <input 
+                            type="text" 
+                            v-model="searchQuery" 
+                            placeholder="Cari kode atau judul..."
+                            @input="onSearchInput"
+                        >
+                    </div>
+                </div>
+
+                <div class="filter-actions">
+                    <button @click="resetFilters" class="btn btn-secondary">Reset Filter</button>
+                    <span class="result-count">
+                        Menampilkan {{ filteredStok.length }} dari {{ stok.length }} bahan ajar
+                    </span>
+                </div>
+            </div>
+
+            
+            <div class="action-bar">
+                <button @click="showAddForm" class="btn btn-success">
+                    <i data-lucide="plus"></i>
+                    Tambah Bahan Ajar Baru
+                </button>
+            </div>
+
+            
+            <div v-if="showForm" class="form-modal">
+                <div class="form-container">
+                    <div class="form-header">
+                        <div class="form-title">
+                            <i :data-lucide="isEditing ? 'edit' : 'plus-circle'"></i>
+                            <h3>{{ isEditing ? 'Edit Bahan Ajar' : 'Tambah Bahan Ajar Baru' }}</h3>
+                        </div>
+                    </div>
+                    
+                    <form @submit.prevent="saveBahanAjar">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Kode Mata Kuliah: <span class="required">*</span></label>
+                                <input 
+                                    type="text" 
+                                    v-model="formData.kode" 
+                                    placeholder="contoh: EKMA4116"
+                                    :disabled="isEditing"
+                                    required
+                                >
+                                <span v-if="errors.kode" class="error-text">{{ errors.kode }}</span>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Judul Mata Kuliah: <span class="required">*</span></label>
+                                <input 
+                                    type="text" 
+                                    v-model="formData.judul" 
+                                    placeholder="contoh: Pengantar Manajemen"
+                                    required
+                                >
+                                <span v-if="errors.judul" class="error-text">{{ errors.judul }}</span>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Kategori: <span class="required">*</span></label>
+                                <select v-model="formData.kategori" required>
+                                    <option value="">-- Pilih Kategori --</option>
+                                    <option v-for="kategori in kategoriList" :key="kategori" :value="kategori">
+                                        {{ kategori }}
+                                    </option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label>UT-Daerah: <span class="required">*</span></label>
+                                <select v-model="formData.upbjj" required>
+                                    <option value="">-- Pilih UT-Daerah --</option>
+                                    <option v-for="upbjj in upbjjList" :key="upbjj" :value="upbjj">
+                                        {{ upbjj }}
+                                    </option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Lokasi Rak: <span class="required">*</span></label>
+                                <input 
+                                    type="text" 
+                                    v-model="formData.lokasiRak" 
+                                    placeholder="contoh: R1-A3"
+                                    required
+                                >
+                            </div>
+
+                            <div class="form-group">
+                                <label>Harga: <span class="required">*</span></label>
+                                <input 
+                                    type="number" 
+                                    v-model.number="formData.harga" 
+                                    placeholder="contoh: 65000"
+                                    min="0"
+                                    required
+                                >
+                                <span v-if="errors.harga" class="error-text">{{ errors.harga }}</span>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Jumlah Stok: <span class="required">*</span></label>
+                                <input 
+                                    type="number" 
+                                    v-model.number="formData.qty" 
+                                    placeholder="contoh: 28"
+                                    min="0"
+                                    required
+                                >
+                                <span v-if="errors.qty" class="error-text">{{ errors.qty }}</span>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Safety Stock: <span class="required">*</span></label>
+                                <input 
+                                    type="number" 
+                                    v-model.number="formData.safety" 
+                                    placeholder="contoh: 20"
+                                    min="0"
+                                    required
+                                >
+                                <span v-if="errors.safety" class="error-text">{{ errors.safety }}</span>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Catatan HTML (opsional):</label>
+                            <input 
+                                type="text" 
+                                v-model="formData.catatanHTML" 
+                                placeholder="contoh: <em>Edisi 2024</em>"
+                            >
+                            <small>Gunakan tag HTML untuk formatting: &lt;em&gt;, &lt;strong&gt;, &lt;u&gt;</small>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary">
+                                {{ isEditing ? 'Update' : 'Simpan' }}
+                            </button>
+                            <button type="button" @click="cancelForm" class="btn btn-secondary">
+                                Batal
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            
+            <div class="table-container">
+                <table v-if="filteredStok.length > 0" class="stok-table">
+                    <thead>
+                        <tr>
+                            <th>Kode</th>
+                            <th>Judul</th>
+                            <th>Kategori</th>
+                            <th>UT-Daerah</th>
+                            <th>Lokasi Rak</th>
+                            <th>Harga</th>
+                            <th>Qty</th>
+                            <th>Safety</th>
+                            <th>Status</th>
+                            <th>Catatan</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="item in filteredStok" :key="item.kode">
+                            <td class="kode-cell">{{ item.kode }}</td>
+                            <td class="judul-cell">{{ item.judul }}</td>
+                            <td>{{ item.kategori }}</td>
+                            <td>{{ item.upbjj }}</td>
+                            <td>{{ item.lokasiRak }}</td>
+                            <td class="harga-cell">Rp {{ formatHarga(item.harga) }}</td>
+                            <td class="qty-cell">{{ item.qty }}</td>
+                            <td class="safety-cell">{{ item.safety }}</td>
+                            <td>
+                                <span :class="['status-badge', getStatusClass(item)]">
+                                    {{ getStatusText(item) }}
+                                </span>
+                            </td>
+                            <td class="catatan-cell">
+                                <span v-html="item.catatanHTML"></span>
+                            </td>
+                            <td class="action-cell">
+                                <button @click="editBahanAjar(item)" class="btn-icon btn-edit" title="Edit">
+                                    <i data-lucide="edit-2"></i>
+                                </button>
+                                <button @click="deleteBahanAjar(item.kode)" class="btn-icon btn-delete" title="Hapus">
+                                    <i data-lucide="trash-2"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div v-else class="empty-state">
+                    <i data-lucide="inbox" class="empty-icon"></i>
+                    <p>Tidak ada bahan ajar yang sesuai dengan filter.</p>
+                    <button @click="resetFilters" class="btn btn-secondary">Reset Filter</button>
+                </div>
+            </div>
+        </div>
+        </div> 
+    </div>
+
+    
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
+    
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <script src="js/dataBahanAjar.js"></script>
+    <script src="js/stok-app.js"></script>
+    <script>
+        app.$nextTick(() => {
+            lucide.createIcons();
+        });
+        app.$watch(() => app.filteredStok, () => {
+            app.$nextTick(() => lucide.createIcons());
+        }, { deep: true });
+    </script>
+</body>
+</html>
